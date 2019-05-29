@@ -1,0 +1,11 @@
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\bin\Debug\netcoreapp2.1\ProgrammingBlockchain1.deps.json
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\bin\Debug\netcoreapp2.1\ProgrammingBlockchain1.runtimeconfig.json
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\bin\Debug\netcoreapp2.1\ProgrammingBlockchain1.runtimeconfig.dev.json
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\bin\Debug\netcoreapp2.1\ProgrammingBlockchain1.dll
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.csprojAssemblyReference.cache
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.csproj.CoreCompileInputs.cache
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.AssemblyInfoInputs.cache
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.AssemblyInfo.cs
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\bin\Debug\netcoreapp2.1\ProgrammingBlockchain1.pdb
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.dll
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain1\obj\Debug\netcoreapp2.1\ProgrammingBlockchain1.pdb

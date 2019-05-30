@@ -3,6 +3,7 @@ using System;
 using QBitNinja.Client;
 using QBitNinja.Client.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ProgrammingBlockchain1
 {
@@ -99,16 +100,69 @@ namespace ProgrammingBlockchain1
 
             // Exercise: Write out the same info about the SPENT COINS using QBitNinja's GetTransactionResponse class
             List<ICoin> spentCoins = transactionResponse.SpentCoins;
-            foreach(var spentCoin in spentCoins)
+            foreach (var spentCoin in spentCoins)
             {
                 Money amountSpent = (Money)spentCoin.Amount;
 
                 Console.WriteLine(amountSpent.ToDecimal(MoneyUnit.BTC));
-                var paymentScript = spentCoin.TxOut.ScriptPubKey;
-                Console.WriteLine(paymentScript); // hmm doesn't appear this worked properly, don't see a script...
+                var paymentScript = spentCoin.TxOut.ScriptPubKey; // not sure if this is working... doesn't look like a script, see below
+                Console.WriteLine(paymentScript); // 0   // ??? '[index of output from prev tx spent in current tx] [hash of prev tx]' == 'Outpoint' ???
+                var address = paymentScript.GetDestinationAddress(Network.Main);
+                Console.WriteLine(address); // 
+            }
+
+            var outputs = transaction.Outputs;  // this does same thing as ReceivedCoins foreach loop above
+            foreach(TxOut output in outputs)
+            {
+                Money amount = output.Value;
+
+                Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
+                var paymentScript = output.ScriptPubKey;
+                Console.WriteLine(paymentScript);
                 var address = paymentScript.GetDestinationAddress(Network.Main);
                 Console.WriteLine(address);
             }
+
+            var inputs = transaction.Inputs;
+            foreach(TxIn input in inputs)
+            {
+                OutPoint previousOutpoint = input.PrevOut;
+                Console.WriteLine(previousOutpoint.Hash);
+                Console.WriteLine(previousOutpoint.N);
+            }
+
+            Money twentyOneBitcoin = new Money(21, MoneyUnit.BTC);
+            var scriptPubKey = transaction.Outputs.First().ScriptPubKey;
+            TxOut txOut = new TxOut(twentyOneBitcoin, scriptPubKey);
+
+            OutPoint firstOutPoint = receivedCoins.First().Outpoint;
+            Console.WriteLine(firstOutPoint.Hash);
+            Console.WriteLine(firstOutPoint.N);
+
+            Console.WriteLine(transaction.Inputs.Count);
+
+            OutPoint firstPreviousOutPoint = transaction.Inputs.First().PrevOut;
+            var firstPreviousTransaction = client.GetTransaction(firstPreviousOutPoint.Hash).Result.Transaction;
+            Console.WriteLine(firstPreviousTransaction.IsCoinBase);
+
+            Money spentAmount = Money.Zero;
+            foreach(var spentCoin in spentCoins)
+            {
+                spentAmount = (Money)spentCoin.Amount.Add(spentAmount);
+            }
+            Console.WriteLine(spentAmount.ToDecimal(MoneyUnit.BTC));
+
+            // Exercise: Get the total received amount
+            Money receivedAmount = Money.Zero;
+            foreach(var receivedCoin in receivedCoins)
+            {
+                receivedAmount = (Money)receivedCoin.Amount.Add(receivedAmount);
+            }
+            Console.WriteLine(receivedAmount.ToDecimal(MoneyUnit.BTC));
+
+            var fee = transaction.GetFee(spentCoins.ToArray());
+            Console.WriteLine(fee);
+            Console.WriteLine(fee == (spentAmount - receivedAmount)); // True
         }
     }
 }

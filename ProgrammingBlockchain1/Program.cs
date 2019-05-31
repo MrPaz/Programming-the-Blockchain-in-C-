@@ -106,9 +106,9 @@ namespace ProgrammingBlockchain1
 
                 Console.WriteLine(amountSpent.ToDecimal(MoneyUnit.BTC));
                 var paymentScript = spentCoin.TxOut.ScriptPubKey; // not sure if this is working... doesn't look like a script, see below
-                Console.WriteLine(paymentScript); // 0   // ??? '[index of output from prev tx spent in current tx] [hash of prev tx]' == 'Outpoint' ???
+                Console.WriteLine(paymentScript); // 0 367003bc5b7cd11b69da538fcb08b5fd18aa67ea  // ??? '[index of output from prev tx spent in current tx] [hash of prev tx]' == 'Outpoint' ???
                 var address = paymentScript.GetDestinationAddress(Network.Main);
-                Console.WriteLine(address); // 
+                Console.WriteLine(address); // bc1qxecq80zm0ng3k6w62w8ukz94l5v25el265eycu
             }
 
             var outputs = transaction.Outputs;  // this does same thing as ReceivedCoins foreach loop above
@@ -163,6 +163,8 @@ namespace ProgrammingBlockchain1
             var fee = transaction.GetFee(spentCoins.ToArray());
             Console.WriteLine(fee);
             Console.WriteLine(fee == (spentAmount - receivedAmount)); // True
+
+
         }
     }
 }

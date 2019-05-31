@@ -6,13 +6,13 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.1": {
-      "ProgrammingBlockchain1/1.0.0": {
+      "ProgrammingBlockchain2/1.0.0": {
         "dependencies": {
           "NBitcoin": "4.1.2.35",
           "QBitNinja.Client": "1.0.3.49"
         },
         "runtime": {
-          "ProgrammingBlockchain1.dll": {}
+          "ProgrammingBlockchain2.dll": {}
         }
       },
       "Microsoft.Extensions.Logging.Abstractions/1.0.2": {
@@ -600,7 +600,7 @@
     }
   },
   "libraries": {
-    "ProgrammingBlockchain1/1.0.0": {
+    "ProgrammingBlockchain2/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

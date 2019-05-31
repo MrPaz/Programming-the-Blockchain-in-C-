@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain1\\ProgrammingBlockchain1.csproj": {}
+    "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain2\\ProgrammingBlockchain2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain1\\ProgrammingBlockchain1.csproj": {
+    "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain2\\ProgrammingBlockchain2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain1\\ProgrammingBlockchain1.csproj",
-        "projectName": "ProgrammingBlockchain1",
-        "projectPath": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain1\\ProgrammingBlockchain1.csproj",
+        "projectUniqueName": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain2\\ProgrammingBlockchain2.csproj",
+        "projectName": "ProgrammingBlockchain2",
+        "projectPath": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain2\\ProgrammingBlockchain2.csproj",
         "packagesPath": "C:\\Users\\mattp\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain1\\obj\\",
+        "outputPath": "C:\\Users\\mattp\\source\\repos\\ProgrammingBlockchain1\\ProgrammingBlockchain2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\ProgramData\\Xamarin\\NuGet\\",

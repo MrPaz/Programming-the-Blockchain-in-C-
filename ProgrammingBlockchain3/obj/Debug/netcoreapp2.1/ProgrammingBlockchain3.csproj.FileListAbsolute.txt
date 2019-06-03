@@ -5,3 +5,7 @@ C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\bin\De
 C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\bin\Debug\netcoreapp2.1\ProgrammingBlockchain3.runtimeconfig.json
 C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\bin\Debug\netcoreapp2.1\ProgrammingBlockchain3.runtimeconfig.dev.json
 C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\bin\Debug\netcoreapp2.1\ProgrammingBlockchain3.dll
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\bin\Debug\netcoreapp2.1\ProgrammingBlockchain3.pdb
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\obj\Debug\netcoreapp2.1\ProgrammingBlockchain3.csprojAssemblyReference.cache
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\obj\Debug\netcoreapp2.1\ProgrammingBlockchain3.dll
+C:\Users\mattp\source\repos\ProgrammingBlockchain1\ProgrammingBlockchain3\obj\Debug\netcoreapp2.1\ProgrammingBlockchain3.pdb

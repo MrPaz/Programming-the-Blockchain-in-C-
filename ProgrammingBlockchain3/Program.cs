@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NBitcoin.Protocol;
+using NBitcoin.Stealth;
 
 namespace ProgrammingBlockchain3
 {
@@ -50,59 +51,88 @@ namespace ProgrammingBlockchain3
             //Console.WriteLine(bitcoinPrivateKey2.GetAddress(ScriptPubKeyType.Legacy) == generatedAddress); // True  // add ScriptPubKeyType.Legacy as argument to GetAddress to get rid of warning message re: GetAddress() being obsolete
             //Console.WriteLine(bitcoinPrivateKey2); // L1tKFXfnUAN1v76DG1sy83JMX18M1ctkGPZXDbBACUhKokFE1VeZ
 
-            ExtKey masterKey = new ExtKey(); // generates a master private key
-            Console.WriteLine("Master Key: " + masterKey.ToString(Network.Main));
-            for (int i = 0; i < 5; i++) // which can be used to deterministically derive child keys
-            {
-                ExtKey key = masterKey.Derive((uint)i);
-                Console.WriteLine("Key " + i + ": " + key.ToString(Network.Main));
-            }
+            //ExtKey masterKey = new ExtKey(); // generates a master private key
+            //Console.WriteLine("Master Key: " + masterKey.ToString(Network.Main));
+            //for (int i = 0; i < 5; i++) // which can be used to deterministically derive child keys by index numbers
+            //{
+            //    ExtKey key = masterKey.Derive((uint)i);
+            //    Console.WriteLine("Key " + i + ": " + key.ToString(Network.Main));
+            //}
 
-            ExtKey extKey = new ExtKey(); // an ExtKey contain a Key (as a property of the ExtKey object); "You can go back from a Key to an ExtKey by supplying the Key and the Chaincode to the ExtKey constructor as follows:"
-            byte[] chainCode = extKey.ChainCode; // what is a chaincode?
-            Key key2 = extKey.PrivateKey;
-            ExtKey newExtKey = new ExtKey(key2, chainCode); // so combining a ChainCode with a Key gets you the ExtKey (but how do you get the chaincode in absence of the ExtKey to pair?)
+            //ExtKey extKey = new ExtKey(); // an ExtKey contain a Key (as a property of the ExtKey object); "You can go back from a Key to an ExtKey by supplying the Key and the Chaincode to the ExtKey constructor as follows:"
+            //byte[] chainCode = extKey.ChainCode; // what is a chaincode?
+            //Key key2 = extKey.PrivateKey;
+            //ExtKey newExtKey = new ExtKey(key2, chainCode); // so combining a ChainCode with a Key gets you the ExtKey (but how do you get the chaincode in absence of the ExtKey to pair?)
 
-            ExtPubKey masterPubKey = masterKey.Neuter(); // generates a master pub key--a pub key from the master private key that can derive child pub keys that match child private keys derived from the master at a given index
-            for (int i = 0; i < 5; i++)
-            {
-                ExtPubKey pubKey = masterPubKey.Derive((uint)i);
-                Console.WriteLine("PubKey " + i + ": " + pubKey.ToString(Network.Main));
-            }
+            //ExtPubKey masterPubKey = masterKey.Neuter(); // generates a master pub key--a pub key from the master private key that can derive child pub keys that match child private keys derived from the master at a given index
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    ExtPubKey pubKey = masterPubKey.Derive((uint)i);
+            //    Console.WriteLine("PubKey " + i + ": " + pubKey.ToString(Network.Main));
+            //}
 
-            ExtKey parent = new ExtKey(); // Derive key Child(1, 1) from parent in two different ways (see example on page 57)
-            ExtKey child1 = parent.Derive(1).Derive(1);
-            // or
-            ExtKey sameChild1 = parent.Derive(new KeyPath("1/1"));
+            //ExtKey parent = new ExtKey(); // Derive key Child(1, 1) from parent in two different ways (see example on page 57)
+            //ExtKey child1 = parent.Derive(1).Derive(1);
+            //// or
+            //ExtKey sameChild1 = parent.Derive(new KeyPath("1/1"));
 
-            ExtPubKey pubkey1 = masterPubKey.Derive((uint)1); // generates pub key for given child index number
-            ExtKey key1 = masterKey.Derive((uint)1); // generates a new extended key as given child index number
-            Console.WriteLine("Generated address: " + pubkey1.PubKey.GetAddress(Network.Main)); // 13r5oaSo33vRvSuqRNwSy8wRV42BrwraQq
-            Console.WriteLine("Expected address: " + key1.PrivateKey.PubKey.GetAddress(Network.Main)); // 13r5oaSo33vRvSuqRNwSy8wRV42BrwraQq
+            //ExtPubKey pubkey1 = masterPubKey.Derive((uint)1); // generates pub key for given child index number
+            //ExtKey key1 = masterKey.Derive((uint)1); // generates a new extended key as given child index number
+            //Console.WriteLine("Generated address: " + pubkey1.PubKey.GetAddress(Network.Main)); // 13r5oaSo33vRvSuqRNwSy8wRV42BrwraQq
+            //Console.WriteLine("Expected address: " + key1.PrivateKey.PubKey.GetAddress(Network.Main)); // 13r5oaSo33vRvSuqRNwSy8wRV42BrwraQq
 
-            ExtKey ceoKey = new ExtKey();
-            Console.WriteLine("CEO: " + ceoKey.ToString(Network.Main));
-            ExtKey accountingKey = ceoKey.Derive(0, hardened: false);
+            //ExtKey ceoKey = new ExtKey();
+            //Console.WriteLine("CEO: " + ceoKey.ToString(Network.Main));
+            //ExtKey accountingKey = ceoKey.Derive(0, hardened: false);
 
-            ExtPubKey ceoPubKey = ceoKey.Neuter();
+            //ExtPubKey ceoPubKey = ceoKey.Neuter();
 
-            ExtKey ceoKeyRecovered = accountingKey.GetParentExtKey(ceoPubKey); // non-hardened keys can determine parent private keys !!
-            Console.WriteLine("CEO key recovered: " + ceoKeyRecovered.ToString(Network.Main)); // same as ceoKey
-            // non-hardened keys should only be used for accounts belonging to a single point of control
-            ExtKey accountingKeyHardened = ceoKey.Derive(0, true);
+            //ExtKey ceoKeyRecovered = accountingKey.GetParentExtKey(ceoPubKey); // non-hardened keys can determine parent private keys !!
+            //Console.WriteLine("CEO key recovered: " + ceoKeyRecovered.ToString(Network.Main)); // same as ceoKey
+            //// non-hardened keys should only be used for accounts belonging to a single point of control
+            //ExtKey accountingKeyHardened = ceoKey.Derive(0, true);
 
-            // ExtKey ceoKeyRecovered2 = accountingKeyHardened.GetParentExtKey(ceoPubKey); // fails: "Exception: the private key is hardened so you can't get its parent"
+            //// ExtKey ceoKeyRecovered2 = accountingKeyHardened.GetParentExtKey(ceoPubKey); // fails: "Exception: the private key is hardened so you can't get its parent"
 
-            // can also create hardened keys via ExtKey.Derivate(KeyPath) by using an apostrophe after a child's index:
-            var nonHardened = new KeyPath("1/2/3");
-            var hardened = new KeyPath("1/2/3'");
-            // so say the Accounting department generates one parent key for each customer, and a child key for each of the customer's payments
-            // as CEO, you want to spend the moeny on one of these addresses. here's how you'd proceed:
-            string accounting = "1'"; // hardened; can't determine CEO's master private key
-            int customerId = 5;
-            int paymentId = 50;
-            KeyPath path = new KeyPath(accounting + "/" + customerId + "/" + paymentId); // Path: "1'/5/50"
-            ExtKey paymentKey = ceoKey.Derive(path);
+            //// can also create hardened keys via ExtKey.Derivate(KeyPath) by using an apostrophe after a child's index:
+            //var nonHardened = new KeyPath("1/2/3");
+            //var hardened = new KeyPath("1/2/3'");
+            //// so say the Accounting department generates one parent key for each customer, and a child key for each of the customer's payments
+            //// as CEO, you want to spend the moeny on one of these addresses. here's how you'd proceed:
+            //string accounting = "1'"; // hardened; can't determine CEO's master private key
+            //int customerId = 5;
+            //int paymentId = 50;
+            //KeyPath path = new KeyPath(accounting + "/" + customerId + "/" + paymentId); // Path: "1'/5/50"
+            //ExtKey paymentKey = ceoKey.Derive(path);
+
+            // MNEMONIC SEED - HD KEYS (BIP 39)
+            Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve); // generates new seed phrase
+            ExtKey hdRoot = mnemonic.DeriveExtKey("my passowrd"); 
+            Console.WriteLine(mnemonic); // captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet
+            Console.WriteLine(hdRoot.ToString(Network.Main));
+            // if you have mnemonic and password you can derive hdRoot key
+            mnemonic = new Mnemonic("captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet", Wordlist.English);
+            hdRoot = mnemonic.DeriveExtKey("my password");
+
+            // DARK WALLET
+            var scanKey = new Key();
+            var spendKey = new Key();
+            BitcoinStealthAddress stealthAddress = new BitcoinStealthAddress
+                (scanKey: scanKey.PubKey,
+                pubKeys: new[] { spendKey.PubKey },
+                signatureCount: 1,
+                bitfield: null,
+                network: Network.Main);
+
+            // var ephemKey = new Key();
+            Transaction transaction = new Transaction();
+            // stealthAddress.SendTo(transaction, Money.Coins(1.0m), ephemKey);
+            // Console.WriteLine(transaction);
+
+            // the EphemKey is an implementation detail; you can omit it and NBitcoin will generate one automatically:
+            stealthAddress.SendTo(transaction, Money.Coins(1.0m));
+            Console.WriteLine(transaction);
+            
         }
     }
 }

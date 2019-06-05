@@ -105,34 +105,119 @@ namespace ProgrammingBlockchain3
             //KeyPath path = new KeyPath(accounting + "/" + customerId + "/" + paymentId); // Path: "1'/5/50"
             //ExtKey paymentKey = ceoKey.Derive(path);
 
-            // MNEMONIC SEED - HD KEYS (BIP 39)
-            Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve); // generates new seed phrase
-            ExtKey hdRoot = mnemonic.DeriveExtKey("my passowrd"); 
-            Console.WriteLine(mnemonic); // captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet
-            Console.WriteLine(hdRoot.ToString(Network.Main));
-            // if you have mnemonic and password you can derive hdRoot key
-            mnemonic = new Mnemonic("captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet", Wordlist.English);
-            hdRoot = mnemonic.DeriveExtKey("my password");
+            //// MNEMONIC SEED - HD KEYS (BIP 39)
+            //Mnemonic mnemonic = new Mnemonic(Wordlist.English, WordCount.Twelve); // generates new seed phrase
+            //ExtKey hdRoot = mnemonic.DeriveExtKey("my passowrd"); 
+            //Console.WriteLine(mnemonic); // captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet
+            //Console.WriteLine(hdRoot.ToString(Network.Main));
+            //// if you have mnemonic and password you can derive hdRoot key
+            //mnemonic = new Mnemonic("captain powder hollow erode lemon bomb scheme shallow kick business shove trumpet", Wordlist.English);
+            //hdRoot = mnemonic.DeriveExtKey("my password");
 
-            // DARK WALLET
-            var scanKey = new Key();
-            var spendKey = new Key();
-            BitcoinStealthAddress stealthAddress = new BitcoinStealthAddress
-                (scanKey: scanKey.PubKey,
-                pubKeys: new[] { spendKey.PubKey },
-                signatureCount: 1,
-                bitfield: null,
-                network: Network.Main);
+            //// DARK WALLET
+            //var scanKey = new Key();
+            //var spendKey = new Key();
+            //BitcoinStealthAddress stealthAddress = new BitcoinStealthAddress
+            //    (scanKey: scanKey.PubKey,
+            //    pubKeys: new[] { spendKey.PubKey },
+            //    signatureCount: 1,
+            //    bitfield: null,
+            //    network: Network.Main);
 
-            // var ephemKey = new Key();
-            Transaction transaction = new Transaction();
-            // stealthAddress.SendTo(transaction, Money.Coins(1.0m), ephemKey);
-            // Console.WriteLine(transaction);
+            //// var ephemKey = new Key();
+            //Transaction transaction = new Transaction();
+            //// stealthAddress.SendTo(transaction, Money.Coins(1.0m), ephemKey);
+            //// Console.WriteLine(transaction);
 
-            // the EphemKey is an implementation detail; you can omit it and NBitcoin will generate one automatically:
-            stealthAddress.SendTo(transaction, Money.Coins(1.0m));
-            Console.WriteLine(transaction);
-            
+            //// the EphemKey is an implementation detail; you can omit it and NBitcoin will generate one automatically:
+            //stealthAddress.SendTo(transaction, Money.Coins(1.0m));
+            //Console.WriteLine(transaction);
+
+            //// P2WPKH Pay to Witness Public Key Hash
+            //var key = new Key();
+            //Console.WriteLine(key.PubKey.WitHash.ScriptPubKey); // simply use WitHash instead of Hash to get ScriptPubKey
+
+            // MULTI SIG
+            Key alice = new Key();
+            Key bob = new Key();
+            Key satoshi = new Key();
+
+            //var scriptPubKey = PayToMultiSigTemplate // creating a 2 of 3 multisig
+            //    .Instance
+            //    .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey });
+            //Console.WriteLine(scriptPubKey);
+            //// signing a multisig is more complicated than just calling Transaction.Sign. For now we will use TransactionBuilder for signing
+            //var received = new Transaction(); // imagine this bitcoin held (received) in the multisig address
+            //received.Outputs.Add(new TxOut(Money.Coins(1.0m), scriptPubKey));
+            //Coin coin = received.Outputs.AsCoins().First();
+            //// create an unsigned transaction
+            //BitcoinAddress matt = new Key().PubKey.GetAddress(Network.Main);
+            //TransactionBuilder builder = new TransactionBuilder();
+            //Transaction unsigned = builder
+            //    .AddCoins(coin)
+            //    .Send(matt, Money.Coins(1.0m))
+            //    .BuildTransaction(sign: false);
+            //// alice signs
+            //Transaction aliceSigned = builder
+            //    .AddCoins(coin)
+            //    .AddKeys(alice)
+            //    .SignTransaction(unsigned);
+            //// bob signs
+            //Transaction bobSigned = builder
+            //    .AddCoins(coin)
+            //    .AddKeys(bob)
+            //    .SignTransaction(aliceSigned); // note we're signing the Tx already signed by alice
+
+            //Transaction fullySigned = builder
+            //    .AddCoins(coin)
+            //    .CombineSignatures(aliceSigned, bobSigned);
+
+            //Console.WriteLine(bobSigned); // it appears bobSigned is same as fullySigned
+            //Console.WriteLine(fullySigned);
+            //// let's look at the case that CombineSignatures() is needed
+            //TransactionBuilder builderNew = new TransactionBuilder();
+            //TransactionBuilder aliceBuilder = new TransactionBuilder();
+            //TransactionBuilder bobBuilder = new TransactionBuilder();
+
+            //Transaction unsignedNew = builderNew
+            //    .AddCoins(coin)
+            //    .Send(matt, Money.Coins(1.0m))
+            //    .BuildTransaction(sign: false);
+
+            //Transaction aliceSignedNew = aliceBuilder
+            //    .AddCoins(coin)
+            //    .AddKeys(alice)
+            //    .SignTransaction(unsignedNew);
+
+            //Transaction bobSignedNew = bobBuilder
+            //    .AddCoins(coin)
+            //    .AddKeys(bob)
+            //    .SignTransaction(unsignedNew); // note signing unsigned tx again
+            //// in this case CombineSignatures() is needed
+            //Transaction fullySignedNew = builderNew.AddCoins(coin).CombineSignatures(aliceSignedNew, bobSignedNew);
+            //// nowadays native Pay to MultiSig as demo'd above are never used directly
+
+            // P2SH Pay to Script Hash
+            // P2SH is an easy way to represent a scriptPubKey as a simple BitcoinScriptAddress no matter how complicated the terms of it's underlying m of n signature set up
+            var paymentScript = PayToMultiSigTemplate
+                .Instance
+                .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey })
+                .PaymentScript; // this p2sh scriptPubKey represents the hash of the multi-sig script: redeemScript.Hash.ScriptPubKey
+            Console.WriteLine(paymentScript); // OP_HASH160 f6acc9ebae72d94541ef11250c996f63d841e6ed OP_EQUAL
+
+            Script redeemScript = PayToMultiSigTemplate
+                .Instance
+                .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey });
+            Console.WriteLine(redeemScript.Hash.GetAddress(Network.Main)); // 3LLq4yWEYCzuf5Q6mAaUcCsjEkTFj2bH8v
+
+            // to sign a tx sent to a p2sh, have to provide the redeem script when building the Coin for the TransactionBuilder
+            // imagine the multi-sig p2sh receives a tx called received
+            Transaction received = new Transaction();
+            received.Outputs.Add(new TxOut(Money.Coins(1.0m), redeemScript.Hash)); // warning: tx sent to redeemScript.Hash, not redeemScript
+            // when any 2 of 3 owners want to spend the tx, instead of creating a Coin, they must create a ScriptCoin
+            ScriptCoin coin = received.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
+            // rest of the tx generation and signing is the same as native multi-sig
+
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using NBitcoin.Protocol;
 using NBitcoin.Stealth;
+using NBitcoin.Crypto;
 
 namespace ProgrammingBlockchain3
 {
@@ -137,10 +138,10 @@ namespace ProgrammingBlockchain3
             //var key = new Key();
             //Console.WriteLine(key.PubKey.WitHash.ScriptPubKey); // simply use WitHash instead of Hash to get ScriptPubKey
 
-            // MULTI SIG
-            Key alice = new Key();
-            Key bob = new Key();
-            Key satoshi = new Key();
+            //// MULTI SIG
+            //Key alice = new Key();
+            //Key bob = new Key();
+            //Key satoshi = new Key();
 
             //var scriptPubKey = PayToMultiSigTemplate // creating a 2 of 3 multisig
             //    .Instance
@@ -199,24 +200,81 @@ namespace ProgrammingBlockchain3
 
             // P2SH Pay to Script Hash
             // P2SH is an easy way to represent a scriptPubKey as a simple BitcoinScriptAddress no matter how complicated the terms of it's underlying m of n signature set up
-            var paymentScript = PayToMultiSigTemplate
-                .Instance
-                .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey })
-                .PaymentScript; // this p2sh scriptPubKey represents the hash of the multi-sig script: redeemScript.Hash.ScriptPubKey
-            Console.WriteLine(paymentScript); // OP_HASH160 f6acc9ebae72d94541ef11250c996f63d841e6ed OP_EQUAL
+            //var paymentScript = PayToMultiSigTemplate
+            //    .Instance
+            //    .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey })
+            //    .PaymentScript; // this p2sh scriptPubKey represents the hash of the multi-sig script: redeemScript.Hash.ScriptPubKey
+            //Console.WriteLine(paymentScript); // OP_HASH160 f6acc9ebae72d94541ef11250c996f63d841e6ed OP_EQUAL
 
-            Script redeemScript = PayToMultiSigTemplate
-                .Instance
-                .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey });
-            Console.WriteLine(redeemScript.Hash.GetAddress(Network.Main)); // 3LLq4yWEYCzuf5Q6mAaUcCsjEkTFj2bH8v
+            //Script redeemScript = PayToMultiSigTemplate
+            //    .Instance
+            //    .GenerateScriptPubKey(2, new[] { alice.PubKey, bob.PubKey, satoshi.PubKey });
+            //Console.WriteLine(redeemScript.Hash.GetAddress(Network.Main)); // 3LLq4yWEYCzuf5Q6mAaUcCsjEkTFj2bH8v
 
-            // to sign a tx sent to a p2sh, have to provide the redeem script when building the Coin for the TransactionBuilder
-            // imagine the multi-sig p2sh receives a tx called received
-            Transaction received = new Transaction();
-            received.Outputs.Add(new TxOut(Money.Coins(1.0m), redeemScript.Hash)); // warning: tx sent to redeemScript.Hash, not redeemScript
-            // when any 2 of 3 owners want to spend the tx, instead of creating a Coin, they must create a ScriptCoin
-            ScriptCoin coin = received.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
-            // rest of the tx generation and signing is the same as native multi-sig
+            //// to sign a tx sent to a p2sh, have to provide the redeem script when building the Coin for the TransactionBuilder
+            //// imagine the multi-sig p2sh receives a tx called received
+            //Transaction received = new Transaction();
+            //received.Outputs.Add(new TxOut(Money.Coins(1.0m), redeemScript.Hash)); // warning: tx sent to redeemScript.Hash, not redeemScript
+            //// when any 2 of 3 owners want to spend the tx, instead of creating a Coin, they must create a ScriptCoin
+            //ScriptCoin coin = received.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
+            //// rest of the tx generation and signing is the same as native multi-sig
+
+            // P2W* Over P2SH aka P2SH(P2WPKH)
+            // since many wallets still don't support segwit (only support P2PKH or P2SH) we can use P2W over P2SH to harness advantages of segwit
+            // for old nodes/wallets, it will look like a normal P2SH tx
+            var key = new Key();
+            Console.WriteLine(key.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey); // OP_HASH160 9f58d10459b72a325723b01e9b4dc3f48494a54a OP_EQUAL
+            // replace ScriptPubKey with it's P2SH equivalent
+            Console.WriteLine(key.PubKey.ScriptPubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey); // I don't understand this section, need to revisit
+
+            // ARBITRARY
+            BitcoinAddress address = BitcoinAddress.Create("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
+            var birth = Encoding.UTF8.GetBytes("04/12/1984");
+            var birthHash = Hashes.Hash256(birth);
+            Script redeemScript = new Script(
+                "OP_IF "
+                    + "OP_HASH256 " + Op.GetPushOp(birthHash.ToBytes()) + " OP_EQUAL " +
+                "OP_ELSE "
+                    + address.ScriptPubKey + " " +
+                "OP_ENDIF");
+            // this redeem script means there's 2 ways of spending this ScriptCoin: either you know the data that give birthHash or you own the bitcoin address
+            // let's say I sent money to this redeemScript
+            var tx = new Transaction();
+            tx.Outputs.Add(new TxOut(Money.Parse("0.0001"), redeemScript.Hash));
+            ScriptCoin scriptCoin = tx.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
+
+            // create spending tx
+            Transaction spending = new Transaction();
+            spending.AddInput(new TxIn(new OutPoint(tx, 0)));
+            // option 1: spender knows my birth date
+            Op pushBirthdate = Op.GetPushOp(birth);
+            Op selectIf = OpcodeType.OP_1; // go to if statement
+            Op redeemBytes = Op.GetPushOp(redeemScript.ToBytes());
+            Script scriptSig = new Script(pushBirthdate, selectIf, redeemBytes);
+            spending.Inputs[0].ScriptSig = scriptSig;
+            // verify that the scriptSig proves ownership of the scriptPubKey
+            var result = spending
+                            .Inputs
+                            .AsIndexedInputs()
+                            .First()
+                            .VerifyScript(tx.Outputs[0].ScriptPubKey);
+            Console.WriteLine(result); // True
+            // option 2: prove ownership of address
+            BitcoinSecret secret = new BitcoinSecret("")
+            var sig = spending.SignInput(secret, scriptCoin);
+            var p2pkhProof = PayToPubkeyHashTemplate
+                                .Instance
+                                .GenerateScriptSig(sig, secret.PrivateKey.PubKey);
+            selectIf = OpcodeType.OP_0; // go to else
+            scriptSig = p2pkhProof + selectIf + redeemBytes;
+            spending.Inputs[0].ScriptSig = scriptSig;
+            // verify 
+            result = spending
+                        .Inputs
+                        .AsIndexedInputs()
+                        .First()
+                        .VerifyScript(tx.Outputs[0].ScriptPubKey);
+            Console.WriteLine(result); // can't verify w/o Nico's private key
 
         }
     }

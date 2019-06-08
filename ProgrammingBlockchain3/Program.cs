@@ -260,7 +260,7 @@ namespace ProgrammingBlockchain3
                             .VerifyScript(tx.Outputs[0].ScriptPubKey);
             Console.WriteLine(result); // True
             // option 2: prove ownership of address
-            BitcoinSecret secret = new BitcoinSecret("")
+            BitcoinSecret secret = new BitcoinSecret("nicolasDoriersPrivateKey");
             var sig = spending.SignInput(secret, scriptCoin);
             var p2pkhProof = PayToPubkeyHashTemplate
                                 .Instance

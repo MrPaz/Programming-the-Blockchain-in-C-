@@ -110,32 +110,93 @@ namespace ProgrammingBlockchain5
             //    "assetId": "AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e",
             //    "quantity": 10
             //}
-            var coin2 = new Coin(
-                fromTxHash: new uint256("fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842"),
-                fromOutputIndex: 0,
-                amount: Money.Satoshis(600),
-                scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
-            BitcoinAssetId assetId2 = new BitcoinAssetId("AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e");
-            ColoredCoin colored = coin2.ToColoredCoin(assetId2, 10);
+            //var coin2 = new Coin(
+            //    fromTxHash: new uint256("fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842"),
+            //    fromOutputIndex: 0,
+            //    amount: Money.Satoshis(600),
+            //    scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
+            //BitcoinAssetId assetId2 = new BitcoinAssetId("AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e");
+            //ColoredCoin colored = coin2.ToColoredCoin(assetId2, 10);
 
-            // also, in this exampled, we needed another coin forFees to pay the tx fee
-            var forFees = new Coin(
-                fromTxHash: new uint256("7f296e96ec3525511b836ace0377a9fbb723a47bdfb07c6bc3a6f2a0c23eba26"),
-                fromOutputIndex: 0,
-                amount: Money.Satoshis(4425000),
-                scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
+            //// also, in this exampled, we needed another coin forFees to pay the tx fee
+            //var forFees = new Coin(
+            //    fromTxHash: new uint256("7f296e96ec3525511b836ace0377a9fbb723a47bdfb07c6bc3a6f2a0c23eba26"),
+            //    fromOutputIndex: 0,
+            //    amount: Money.Satoshis(4425000),
+            //    scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
 
-            TransactionBuilder builder2 = new TransactionBuilder();
-            var tx2 = builder2
-                .AddCoins(colored, forFees) // note: added newly created colored coin, and coin to pay fees in this example
-                .AddKeys(bookKey)
-                .SendAsset(book, new AssetMoney(assetId2, 10))
-                .SetChange(nico)
-                .SendFees(Money.Coins(0.0001m))
+            //TransactionBuilder builder2 = new TransactionBuilder();
+            //var tx2 = builder2
+            //    .AddCoins(colored, forFees) // note: added newly created colored coin, and coin to pay fees in this example
+            //    .AddKeys(bookKey)
+            //    .SendAsset(book, new AssetMoney(assetId2, 10))
+            //    .SetChange(nico)
+            //    .SendFees(Money.Coins(0.0001m))
+            //    .BuildTransaction(true);
+
+            //Console.WriteLine(tx2); // again, errors b/c we don't have Nico's secret and I don't feel like creating another real tx and dealing with privacy when I push this to github
+
+            // UNIT TESTS
+            // create 2 issuers silver and gold, and fake tx to give bitcoin to silver, gold, satoshi
+            var gold = new Key();
+            var silver = new Key();
+            var goldId = gold.PubKey.ScriptPubKey.Hash.ToAssetId();
+            var silverId = silver.PubKey.ScriptPubKey.Hash.ToAssetId();
+
+            var alice = new Key();
+            var bob = new Key();
+            var satoshi = new Key();
+
+            var init = new Transaction()
+            {
+                Outputs =
+                {
+                    new TxOut("1.0", gold),
+                    new TxOut("1.0", silver),
+                    new TxOut("1.0", satoshi)
+                }
+            };
+            // in NBitcoin the sammary of color coin issuance and transfer is described by class ColoredTransaction
+            // the trick to writing unit tests is to use an in memory IColoredTransactionRepository
+            var repo = new NoSqlColoredTransactionRepository();
+            // now we can put the init tx inside
+            repo.Transactions.Put(init);
+            // now we can get the color
+            ColoredTransaction color = ColoredTransaction.FetchColors(init, repo);
+            Console.WriteLine(color);
+            // now we will use the coins sent to silver and gold as Issuance coins
+            var issuanceCoins = init
+                .Outputs
+                .AsCoins()
+                .Take(2)
+                .Select((c, i) => new IssuanceCoin(c))
+                .OfType<ICoin>()
+                .ToArray();
+            var sendGoldToSatoshi = new Transaction(); // use TransactionBuilder to send Gold to Satoshi, then put resulting tx in repo and print result
+
+            var goldCoin = ColoredCoin.Find(sendGoldToSatoshi, color).FirstOrDefault();
+            builder = new TransactionBuilder();
+            var sendToBobAndAlice = builder
+                .AddKeys(satoshi)
+                .AddCoins(goldCoin)
+                .SendAsset(alice, new AssetMoney(goldId, 4))
+                .SetChange(satoshi)
                 .BuildTransaction(true);
-
-            Console.WriteLine(tx2); // again, errors b/c we don't have Nico's secret and I don't feel like creating another real tx and dealing with privacy when I push this to github
-
+            // not enough funds; goldCoin input only has 600sats and need 1200 for output to transfer assets to Alice and change to satoshi; add coin
+            var satoshiBtc = init.Outputs.AsCoins().Last();
+            builder = new TransactionBuilder();
+            var sendToAlice = builder
+                .AddKeys(satoshi)
+                .AddCoins(goldCoin, satoshiBtc)
+                .SendAsset(alice, new AssetMoney(goldId, 4))
+                .SetChange(satoshi)
+                .BuildTransaction(true);
+            repo.Transactions.Put(sendToAlice);
+            color = ColoredTransaction.FetchColors(sendToAlice, repo);
+            // see transaction and its color
+            Console.WriteLine(sendToAlice);
+            Console.WriteLine(color);
+            // have made a unit test that emits and transfers some assets w/o any external dependencies
         }
     }
 }
